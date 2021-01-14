@@ -97,8 +97,9 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          final compress = VideoCompress();
           File file = await ImagePicker.pickVideo(source: ImageSource.gallery);
-          final info = await VideoCompress.compressVideo(
+          final info = await compress.compressVideo(
             file.path,
             quality: VideoQuality.MediumQuality,
             deleteOrigin: false,
