@@ -18,12 +18,12 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
-
+import java.util.concurrent.Future
 /**
  * VideoCompressPlugin
  */
 class VideoCompressPlugin private constructor(private val activity: Activity, private val context: Context, private val channel: MethodChannel) : MethodCallHandler {
-
+    private var transcodeFuture:Future<Void>? = null
     var channelName = "video_compress"
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
@@ -48,6 +48,7 @@ class VideoCompressPlugin private constructor(private val activity: Activity, pr
                 result.success(Utility(channelName).deleteAllCache(context, result))
             }
             "cancelCompression" -> {
+                transcodeFuture?.cancel(true)
                 result.success(false)
                 // TODO: Made Transcoder.into Global to call Transcoder.cancel(true); here
             }
@@ -87,7 +88,7 @@ class VideoCompressPlugin private constructor(private val activity: Activity, pr
                     }
                 }
 
-                Transcoder.into(destPath!!)
+                transcodeFuture = Transcoder.into(destPath!!)
                         .addDataSource(context, Uri.parse(path))
                         .setVideoTrackStrategy(strategy)
                         .setListener(object : TranscoderListener {
